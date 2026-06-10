@@ -1,0 +1,5 @@
+{
+  "name": "taoyuango-lineat",
+  "private": true,
+  "workspaces": ["backend", "frontend"]
+}
