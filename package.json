@@ -1,5 +1,11 @@
 {
   "name": "taoyuango-lineat",
   "private": true,
-  "workspaces": ["backend", "frontend"]
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "dependencies": {
+    "canvas": "^3.2.3"
+  }
 }

@@ -1,60 +1,103 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
-const inputStyle = { width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4, marginBottom: 8 };
-const btnStyle = { padding: '8px 16px', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 500 };
-
-const emptyForm = { name: '', avatar_url: '', bio: '', link_url: '', link_type: 'blog', active: true };
+const emptyForm = { name: '', brand: '', avatar_url: '', bio: '', link_url: '', link_type: 'blog', active: true };
 
 export default function Writers() {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
-  const load = () => api.getWriters().then(setItems);
+  const load = () => api.getWriters().then(d => setItems(Array.isArray(d) ? d : []));
   useEffect(() => { load(); }, []);
 
+  const openNew = () => { setEditId(null); setForm(emptyForm); setShowModal(true); };
+  const openEdit = (item) => { setEditId(item.id); setForm(item); setShowModal(true); };
+
   const save = async () => {
+    if (!form.name.trim()) return alert('請輸入作家名稱');
     if (editId) await api.updateWriter(editId, form);
     else await api.createWriter(form);
-    setForm(emptyForm); setEditId(null); load();
+    setShowModal(false); load();
   };
 
-  const edit = (item) => { setForm(item); setEditId(item.id); };
   const remove = async (id) => { if (confirm('確定刪除？')) { await api.deleteWriter(id); load(); } };
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, marginBottom: 24 }}>好文推薦 - 作家管理</h1>
-      <div style={{ background: '#fff', padding: 24, borderRadius: 8, marginBottom: 24 }}>
-        <h3 style={{ marginBottom: 12 }}>{editId ? '編輯' : '新增'}作家</h3>
-        <input placeholder="作家名稱" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} />
-        <input placeholder="頭像網址" value={form.avatar_url} onChange={e => setForm({ ...form, avatar_url: e.target.value })} style={inputStyle} />
-        <textarea placeholder="作家簡介" value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} rows={2} style={{ ...inputStyle, resize: 'vertical' }} />
-        <input placeholder="文章連結 (FB / Blog)" value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} style={inputStyle} />
-        <select value={form.link_type} onChange={e => setForm({ ...form, link_type: e.target.value })} style={{ ...inputStyle, width: 'auto' }}>
-          <option value="blog">Blog</option>
-          <option value="facebook">Facebook</option>
-        </select>
-        <div style={{ marginTop: 12 }}>
-          <button onClick={save} style={{ ...btnStyle, background: '#ab47bc', color: '#fff', marginRight: 8 }}>{editId ? '更新' : '新增'}</button>
-          {editId && <button onClick={() => { setEditId(null); setForm(emptyForm); }} style={{ ...btnStyle, background: '#ccc' }}>取消</button>}
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h1 style={{ fontSize: 22, margin: 0 }}>好文推薦管理</h1>
+        <button onClick={openNew} style={s.addBtn}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          新增作家
+        </button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-        {items?.map(item => (
-          <div key={item.id} style={{ background: '#fff', borderRadius: 8, padding: 20, textAlign: 'center', border: '1px solid #eee' }}>
-            {item.avatar_url && <img src={item.avatar_url} alt={item.name} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', marginBottom: 12 }} />}
-            <h4>{item.name}</h4>
-            <p style={{ fontSize: 12, color: '#666', margin: '8px 0' }}>{item.bio}</p>
-            <p style={{ fontSize: 11, color: '#999' }}>{item.link_type === 'facebook' ? 'Facebook' : 'Blog'}</p>
-            <div style={{ marginTop: 12 }}>
-              <button onClick={() => edit(item)} style={{ ...btnStyle, background: '#4fc3f7', color: '#fff', marginRight: 4, fontSize: 12 }}>編輯</button>
-              <button onClick={() => remove(item.id)} style={{ ...btnStyle, background: '#e74c3c', color: '#fff', fontSize: 12 }}>刪除</button>
-            </div>
+
+      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e8e8e8', overflow: 'hidden' }}>
+        <div style={s.header}>
+          <span style={{ flex: 0.5 }}></span>
+          <span style={{ flex: 1.5 }}>作家名稱</span>
+          <span style={{ flex: 1 }}>品牌</span>
+          <span style={{ flex: 0.8, textAlign: 'center' }}>狀態</span>
+          <span style={{ flex: 1, textAlign: 'center' }}>操作</span>
+        </div>
+        {items.map(item => (
+          <div key={item.id} style={s.row}>
+            <span style={{ flex: 0.5 }}>
+              {item.avatar_url ? <img src={item.avatar_url} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} /> : <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#eee' }} />}
+            </span>
+            <span style={{ flex: 1.5, fontWeight: 500 }}>{item.name}</span>
+            <span style={{ flex: 1, fontSize: 12, color: '#666' }}>{item.brand || '—'}</span>
+            <span style={{ flex: 0.8, textAlign: 'center' }}>
+              <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 10, background: item.active ? '#dcfce7' : '#f3f4f6', color: item.active ? '#16a34a' : '#6b7280', fontWeight: 500 }}>{item.active ? '上架' : '下架'}</span>
+            </span>
+            <span style={{ flex: 1, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: 6 }}>
+              <button onClick={() => openEdit(item)} style={s.actionBtn} title="修改">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button onClick={() => remove(item.id)} style={s.actionBtn} title="刪除">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              </button>
+            </span>
           </div>
         ))}
+        {!items.length && <p style={{ textAlign: 'center', color: '#888', padding: 40 }}>尚無作家，點擊右上角新增</p>}
       </div>
+
+      {showModal && (
+        <div style={s.overlay} onClick={() => setShowModal(false)}>
+          <div style={s.modal} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>{editId ? '編輯作家' : '新增作家'}</h3>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', lineHeight: 1 }} aria-label="關閉">&times;</button>
+            </div>
+            <label style={s.label}>作家名稱</label>
+            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={s.input} placeholder="作家名稱…" />
+            <label style={s.label}>品牌名稱（選填）</label>
+            <input value={form.brand || ''} onChange={e => setForm({ ...form, brand: e.target.value })} style={s.input} placeholder="品牌名稱…" />
+            <label style={s.label}>頭像網址</label>
+            <input value={form.avatar_url} onChange={e => setForm({ ...form, avatar_url: e.target.value })} style={s.input} placeholder="https://..." />
+            <label style={s.label}>簡介</label>
+            <textarea value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} rows={2} style={{ ...s.input, resize: 'vertical' }} placeholder="作家簡介…" />
+            <label style={s.label}>文章連結</label>
+            <input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} style={s.input} placeholder="https://..." />
+            <button onClick={save} style={s.saveBtn}>{editId ? '更新' : '新增'}</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+const s = {
+  addBtn: { display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', background: '#ab47bc', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+  header: { display: 'flex', alignItems: 'center', padding: '10px 16px', fontSize: 12, fontWeight: 600, color: '#555', background: '#f8f8f8', borderBottom: '1px solid #e8e8e8' },
+  row: { display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0', fontSize: 13 },
+  actionBtn: { padding: 6, background: 'none', border: '1px solid #e8e8e8', borderRadius: 6, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' },
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modal: { background: '#fff', borderRadius: 12, padding: 24, width: 500, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto' },
+  label: { display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 4, marginTop: 12, color: '#333' },
+  input: { width: '100%', padding: '10px 12px', border: '1px solid #ddd', borderRadius: 6, fontSize: 14, boxSizing: 'border-box' },
+  saveBtn: { width: '100%', marginTop: 20, padding: 12, background: '#ab47bc', color: '#fff', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer' },
+};

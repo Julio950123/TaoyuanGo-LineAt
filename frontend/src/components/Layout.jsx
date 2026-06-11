@@ -7,6 +7,7 @@ const navItems = [
   { path: '/stores', label: '合作店家' },
   { path: '/offers', label: '店家優惠' },
   { path: '/writers', label: '好文推薦' },
+  { path: '/friends', label: '好友管理' },
   { path: '/settings', label: '設定' },
 ];
 

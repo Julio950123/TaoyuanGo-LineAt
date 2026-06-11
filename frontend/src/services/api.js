@@ -38,4 +38,7 @@ export const api = {
 
   getSettings: () => request('/api/settings'),
   updateSettings: (data) => request('/api/settings', { method: 'PUT', body: JSON.stringify(data) }),
+
+  getFriends: () => request('/api/friends'),
+  updateFriend: (id, data) => request(`/api/friends/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 };
