@@ -13,7 +13,7 @@ export default function Stores() {
   const [sortDir, setSortDir] = useState('asc');
   const handleSort = (key) => { if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortKey(key); setSortDir('asc'); } };
   const sorted = [...items].sort((a, b) => { if (!sortKey) return 0; let va = a[sortKey] ?? '', vb = b[sortKey] ?? ''; if (sortKey === 'active') { va = va === true ? 2 : va === null ? 0 : 1; vb = vb === true ? 2 : vb === null ? 0 : 1; } if (va < vb) return sortDir === 'asc' ? -1 : 1; if (va > vb) return sortDir === 'asc' ? 1 : -1; return 0; });
-  const SortIcon = ({ k }) => sortKey === k ? <span style={{ marginLeft: 4, fontSize: 10 }}>{sortDir === 'asc' ? '▲' : '▼'}</span> : null;
+  const SortIcon = ({ k }) => <span style={{ marginLeft: 4, fontSize: 10, color: sortKey === k ? '#333' : '#ccc' }}>{sortKey === k ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}</span>;
   const load = () => api.getStores().then(d => setItems(Array.isArray(d) ? d : []));
   useEffect(() => { load(); }, []);
 

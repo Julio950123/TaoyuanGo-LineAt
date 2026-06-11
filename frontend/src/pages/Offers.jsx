@@ -14,7 +14,7 @@ export default function Offers() {
   const [sortDir, setSortDir] = useState('asc');
   const handleSort = (key) => { if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortKey(key); setSortDir('asc'); } };
   const sorted = [...items].sort((a, b) => { if (!sortKey) return 0; let va = sortKey === 'store_name' ? (a.stores?.name ?? '') : (a[sortKey] ?? ''); let vb = sortKey === 'store_name' ? (b.stores?.name ?? '') : (b[sortKey] ?? ''); if (va < vb) return sortDir === 'asc' ? -1 : 1; if (va > vb) return sortDir === 'asc' ? 1 : -1; return 0; });
-  const SortIcon = ({ k }) => sortKey === k ? <span style={{ marginLeft: 4, fontSize: 10 }}>{sortDir === 'asc' ? '▲' : '▼'}</span> : null;
+  const SortIcon = ({ k }) => <span style={{ marginLeft: 4, fontSize: 10, color: sortKey === k ? '#333' : '#ccc' }}>{sortKey === k ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}</span>;
 
   const load = () => { api.getOffers().then(d => setItems(Array.isArray(d) ? d : [])); api.getStores().then(d => setStores(Array.isArray(d) ? d : [])); };
   useEffect(() => { load(); }, []);

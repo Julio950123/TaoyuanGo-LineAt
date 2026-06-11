@@ -31,7 +31,7 @@ export default function News() {
     return 0;
   });
 
-  const SortIcon = ({ k }) => sortKey === k ? <span style={{ marginLeft: 4, fontSize: 10 }}>{sortDir === 'asc' ? '▲' : '▼'}</span> : null;
+  const SortIcon = ({ k }) => <span style={{ marginLeft: 4, fontSize: 10, color: sortKey === k ? '#333' : '#ccc' }}>{sortKey === k ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}</span>;
 
   // Image & crop state
   const [imageFile, setImageFile] = useState(null); // final cropped blob
