@@ -25,6 +25,11 @@ export default function Offers() {
 
   const remove = async (id) => { if (confirm('確定刪除？')) { await api.deleteOffer(id); load(); } };
 
+  const toggleActive = async (item) => {
+    await api.updateOffer(item.id, { active: !item.active });
+    load();
+  };
+
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('zh-TW') : '';
 
   return (
@@ -59,6 +64,12 @@ export default function Offers() {
             <span style={{ flex: 1, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: 6 }}>
               <button onClick={() => openEdit(item)} style={s.actionBtn} title="修改">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button onClick={() => toggleActive(item)} style={s.actionBtn} title={item.active ? '下架' : '上架'}>
+                {item.active
+                  ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                  : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                }
               </button>
               <button onClick={() => remove(item.id)} style={s.actionBtn} title="刪除">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>

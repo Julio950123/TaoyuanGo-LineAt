@@ -82,8 +82,8 @@ export default function Stores() {
                 </button>
                 <button onClick={() => toggleActive(item)} style={s.actionBtn} title={item.active ? '下架' : '上架'}>
                   {item.active
-                    ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round"><path d="M18.36 6.64A9 9 0 0 1 12 21a9 9 0 0 1-6.36-2.64"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
-                    : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                    : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
                   }
                 </button>
                 <button onClick={() => remove(item.id)} style={s.actionBtn} title="刪除">

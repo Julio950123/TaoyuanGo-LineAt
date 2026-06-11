@@ -3,6 +3,15 @@ import { supabase } from '../supabase';
 
 export const pagesRouter = Router();
 
+function trackingScript(page: string) {
+  return `<script>
+(function(){
+  var uid = new URLSearchParams(location.search).get('uid');
+  if(uid) fetch('/api/footprints/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:uid,page:'${page}',action:'view'})});
+})();
+</script>`;
+}
+
 // 最新消息頁面
 pagesRouter.get('/news', async (_req, res) => {
   const { data } = await supabase.from('news').select('*').eq('published', true).order('created_at', { ascending: false });
@@ -40,6 +49,7 @@ ${items.length === 0 ? '<p class="empty">目前沒有最新消息</p>' : items.m
     <div class="item-date">${[item.start_date, item.end_date].filter(Boolean).join(' ~ ') || new Date(item.created_at).toLocaleDateString('zh-TW')}</div>
   </div>
 </div>`).join('')}
+${trackingScript('news')}
 </body></html>`);
 });
 
@@ -87,6 +97,7 @@ ${items.length === 0 ? '<p class="empty">目前沒有優惠資訊</p>' : items.m
   <div class="item-desc">${esc(item.description || '')}</div>
   <div class="item-date">${item.start_date || ''} ~ ${item.end_date || ''}</div>
 </div>`).join('')}
+${trackingScript('offers')}
 </body></html>`);
 });
 
@@ -143,5 +154,6 @@ ${filtered.length === 0 ? '<p class="empty">目前沒有合作店家</p>' : filt
     ${item.website_url ? `<br><a class="item-link" href="${esc(item.website_url)}" target="_blank">${esc(item.button_text || '查看詳情')} →</a>` : ''}
   </div>
 </div>`).join('')}
+${trackingScript('stores')}
 </body></html>`);
 });

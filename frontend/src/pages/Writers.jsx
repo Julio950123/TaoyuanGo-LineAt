@@ -8,12 +8,32 @@ export default function Writers() {
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const load = () => api.getWriters().then(d => setItems(Array.isArray(d) ? d : []));
   useEffect(() => { load(); }, []);
 
   const openNew = () => { setEditId(null); setForm(emptyForm); setShowModal(true); };
   const openEdit = (item) => { setEditId(item.id); setForm(item); setShowModal(true); };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('image', file);
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    const data = await res.json();
+    if (data.url) setForm(prev => ({ ...prev, avatar_url: data.url }));
+    else alert('上傳失敗：' + (data.error || '未知錯誤'));
+    setUploading(false);
+    e.target.value = '';
+  };
 
   const save = async () => {
     if (!form.name.trim()) return alert('請輸入作家名稱');
@@ -23,6 +43,11 @@ export default function Writers() {
   };
 
   const remove = async (id) => { if (confirm('確定刪除？')) { await api.deleteWriter(id); load(); } };
+
+  const toggleActive = async (item) => {
+    await api.updateWriter(item.id, { active: !item.active });
+    load();
+  };
 
   return (
     <div>
@@ -56,6 +81,12 @@ export default function Writers() {
               <button onClick={() => openEdit(item)} style={s.actionBtn} title="修改">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
+              <button onClick={() => toggleActive(item)} style={s.actionBtn} title={item.active ? '下架' : '上架'}>
+                {item.active
+                  ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                  : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                }
+              </button>
               <button onClick={() => remove(item.id)} style={s.actionBtn} title="刪除">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
               </button>
@@ -76,8 +107,15 @@ export default function Writers() {
             <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={s.input} placeholder="作家名稱…" />
             <label style={s.label}>品牌名稱（選填）</label>
             <input value={form.brand || ''} onChange={e => setForm({ ...form, brand: e.target.value })} style={s.input} placeholder="品牌名稱…" />
-            <label style={s.label}>頭像網址</label>
-            <input value={form.avatar_url} onChange={e => setForm({ ...form, avatar_url: e.target.value })} style={s.input} placeholder="https://..." />
+            <label style={s.label}>頭像</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+              {form.avatar_url ? <img src={form.avatar_url} alt="" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} /> : <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#eee' }} />}
+              <label style={{ padding: '6px 14px', background: '#f3f4f6', border: '1px solid #ddd', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>
+                {uploading ? '上傳中…' : '上傳圖片'}
+                <input type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} />
+              </label>
+            </div>
+            <input value={form.avatar_url} onChange={e => setForm({ ...form, avatar_url: e.target.value })} style={s.input} placeholder="或貼上頭像網址 https://..." />
             <label style={s.label}>簡介</label>
             <textarea value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} rows={2} style={{ ...s.input, resize: 'vertical' }} placeholder="作家簡介…" />
             <label style={s.label}>文章連結</label>

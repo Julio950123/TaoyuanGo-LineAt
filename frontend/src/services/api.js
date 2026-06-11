@@ -41,4 +41,6 @@ export const api = {
 
   getFriends: () => request('/api/friends'),
   updateFriend: (id, data) => request(`/api/friends/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+
+  getFootprints: (uid) => request(`/api/footprints/user/${uid}`),
 };

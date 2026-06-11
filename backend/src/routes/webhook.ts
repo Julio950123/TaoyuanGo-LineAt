@@ -47,6 +47,7 @@ webhookRouter.post('/', async (req, res) => {
 
       const text = event.message.text.trim();
       const replyToken = event.replyToken;
+      const userId = event.source?.userId || '';
 
       if (text === '最新消息') {
         const today = new Date().toISOString().slice(0, 10);
@@ -64,7 +65,7 @@ webhookRouter.post('/', async (req, res) => {
           .limit(1);
         const combined = [...(winners || []), ...(activities || [])].slice(0, 9);
         if (combined.length) {
-          const moreUrl = `${BASE_URL()}/pages/news`;
+          const moreUrl = `${BASE_URL()}/pages/news?uid=${userId}`;
           await lineClient.replyMessage({ replyToken, messages: [newsFlexMessage(combined, moreUrl)] as any });
         } else {
           await lineClient.replyMessage({ replyToken, messages: [{ type: 'text', text: '目前沒有最新消息！' }] });
@@ -73,14 +74,14 @@ webhookRouter.post('/', async (req, res) => {
         // 回傳網頁連結
         await lineClient.replyMessage({ replyToken, messages: [{
           type: 'text',
-          text: `🎁 店家優惠\n\n點擊查看所有優惠資訊：\n${BASE_URL()}/pages/offers`
+          text: `🎁 店家優惠\n\n點擊查看所有優惠資訊：\n${BASE_URL()}/pages/offers?uid=${userId}`
         }] });
       } else if (text === '合作店家') {
         const { data } = await supabase.from('stores').select('*').eq('active', true);
         if (data?.length) {
           // Randomly pick 9 stores
           const shuffled = data.sort(() => Math.random() - 0.5).slice(0, 9);
-          const moreUrl = `${BASE_URL()}/pages/stores`;
+          const moreUrl = `${BASE_URL()}/pages/stores?uid=${userId}`;
           await lineClient.replyMessage({ replyToken, messages: [storeFlexMessage(shuffled, moreUrl)] as any });
         } else {
           await lineClient.replyMessage({ replyToken, messages: [{ type: 'text', text: '目前沒有合作店家資訊！' }] });

@@ -12,6 +12,7 @@ import { authRouter } from './routes/auth';
 import { friendsRouter } from './routes/friends';
 import { pagesRouter } from './routes/pages';
 import { uploadRouter } from './routes/upload';
+import { footprintsRouter } from './routes/footprints';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use('/webhook', webhookRouter);
 app.use('/api/auth', authRouter);
 app.use('/pages', pagesRouter);
+app.use('/api/footprints', footprintsRouter);
 
 // Protected (admin)
 app.use('/api/news', newsRouter);

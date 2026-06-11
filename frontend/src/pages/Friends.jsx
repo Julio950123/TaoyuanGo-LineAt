@@ -7,8 +7,16 @@ export default function Friends() {
   const [editForm, setEditForm] = useState({ real_name: '', phone: '' });
   const [noteId, setNoteId] = useState(null);
   const [noteText, setNoteText] = useState('');
+  const [footprintUid, setFootprintUid] = useState(null);
+  const [footprints, setFootprints] = useState([]);
 
   useEffect(() => { api.getFriends().then(d => setFriends(Array.isArray(d) ? d : [])); }, []);
+
+  const viewFootprints = async (c) => {
+    setFootprintUid(c.line_user_id);
+    const data = await api.getFootprints(c.line_user_id);
+    setFootprints(Array.isArray(data) ? data : []);
+  };
 
   const startEdit = (c) => { setEditingId(c.id); setEditForm({ real_name: c.real_name || '', phone: c.phone || '' }); };
   const saveEdit = async () => {
@@ -59,6 +67,9 @@ export default function Friends() {
               <button onClick={() => startEdit(c)} title="編輯" style={s.iconBtn}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
+              <button onClick={() => viewFootprints(c)} title="足跡" style={s.iconBtn}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+              </button>
             </span>
           </div>
         ))}
@@ -90,6 +101,28 @@ export default function Friends() {
             </div>
             <textarea value={noteText} onChange={e => setNoteText(e.target.value)} style={{ ...s.input, minHeight: 120, resize: 'vertical' }} placeholder="輸入備註…" />
             <button onClick={saveNote} style={{ width: '100%', marginTop: 12, padding: 12, background: '#4fc3f7', color: '#fff', border: 'none', borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>儲存</button>
+          </div>
+        </div>
+      )}
+
+      {footprintUid && (
+        <div style={s.overlay} onClick={() => setFootprintUid(null)}>
+          <div style={{ ...s.modal, width: 500 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>用戶足跡</h3>
+              <button onClick={() => setFootprintUid(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }} aria-label="關閉">&times;</button>
+            </div>
+            {footprints.length === 0 ? <p style={{ color: '#888', textAlign: 'center', padding: 20 }}>尚無足跡記錄</p> : (
+              <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+                {footprints.map(fp => (
+                  <div key={fp.id} style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f0f0f0', gap: 12 }}>
+                    <span style={{ fontSize: 11, color: '#999', minWidth: 120 }}>{new Date(fp.created_at).toLocaleString('zh-TW')}</span>
+                    <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 4, background: fp.page === 'news' ? '#e3f2fd' : fp.page === 'stores' ? '#e8f5e9' : '#fff3e0', color: fp.page === 'news' ? '#1976d2' : fp.page === 'stores' ? '#388e3c' : '#f57c00' }}>{fp.page === 'news' ? '最新消息' : fp.page === 'stores' ? '合作店家' : '店家優惠'}</span>
+                    <span style={{ fontSize: 12, color: '#666' }}>{fp.action || ''}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
