@@ -10,6 +10,12 @@ export default function Offers() {
   const [editId, setEditId] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDir, setSortDir] = useState('asc');
+  const handleSort = (key) => { if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortKey(key); setSortDir('asc'); } };
+  const sorted = [...items].sort((a, b) => { if (!sortKey) return 0; let va = sortKey === 'store_name' ? (a.stores?.name ?? '') : (a[sortKey] ?? ''); let vb = sortKey === 'store_name' ? (b.stores?.name ?? '') : (b[sortKey] ?? ''); if (va < vb) return sortDir === 'asc' ? -1 : 1; if (va > vb) return sortDir === 'asc' ? 1 : -1; return 0; });
+  const SortIcon = ({ k }) => sortKey === k ? <span style={{ marginLeft: 4, fontSize: 10 }}>{sortDir === 'asc' ? '▲' : '▼'}</span> : null;
+
   const load = () => { api.getOffers().then(d => setItems(Array.isArray(d) ? d : [])); api.getStores().then(d => setStores(Array.isArray(d) ? d : [])); };
   useEffect(() => { load(); }, []);
 
@@ -44,13 +50,13 @@ export default function Offers() {
 
       <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e8e8e8', overflow: 'hidden' }}>
         <div style={s.header}>
-          <span style={{ flex: 1.5 }}>店家</span>
-          <span style={{ flex: 2 }}>優惠標題</span>
-          <span style={{ flex: 1.5 }}>日期區間</span>
-          <span style={{ flex: 0.8, textAlign: 'center' }}>狀態</span>
+          <span style={{ flex: 1.5, cursor: 'pointer' }} onClick={() => handleSort('store_name')}>店家<SortIcon k="store_name"/></span>
+          <span style={{ flex: 2, cursor: 'pointer' }} onClick={() => handleSort('title')}>優惠標題<SortIcon k="title"/></span>
+          <span style={{ flex: 1.5, cursor: 'pointer' }} onClick={() => handleSort('start_date')}>日期區間<SortIcon k="start_date"/></span>
+          <span style={{ flex: 0.8, textAlign: 'center', cursor: 'pointer' }} onClick={() => handleSort('active')}>狀態<SortIcon k="active"/></span>
           <span style={{ flex: 1, textAlign: 'center' }}>操作</span>
         </div>
-        {items.map(item => (
+        {sorted.map(item => (
           <div key={item.id} style={s.row}>
             <span style={{ flex: 1.5, fontSize: 12, color: '#666' }}>{item.stores?.name || '—'}</span>
             <span style={{ flex: 2, fontWeight: 500 }}>{item.title}</span>

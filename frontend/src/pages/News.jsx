@@ -13,6 +13,26 @@ export default function News() {
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  // Sort state
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDir, setSortDir] = useState('asc');
+
+  const handleSort = (key) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  };
+
+  const sorted = [...items].sort((a, b) => {
+    if (!sortKey) return 0;
+    let va = a[sortKey] ?? '', vb = b[sortKey] ?? '';
+    if (sortKey === 'published') { va = va ? 1 : 0; vb = vb ? 1 : 0; }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const SortIcon = ({ k }) => sortKey === k ? <span style={{ marginLeft: 4, fontSize: 10 }}>{sortDir === 'asc' ? '▲' : '▼'}</span> : null;
+
   // Image & crop state
   const [imageFile, setImageFile] = useState(null); // final cropped blob
   const [imagePreview, setImagePreview] = useState(null); // preview URL for display
@@ -144,12 +164,12 @@ export default function News() {
 
       <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e8e8e8', overflow: 'hidden' }}>
         <div style={s.header}>
-          <span style={{ flex: 2 }}>標題</span>
-          <span style={{ flex: 1.5 }}>日期區間</span>
-          <span style={{ flex: 0.8, textAlign: 'center' }}>狀態</span>
+          <span style={{ flex: 2, cursor: 'pointer' }} onClick={() => handleSort('title')}>標題<SortIcon k="title"/></span>
+          <span style={{ flex: 1.5, cursor: 'pointer' }} onClick={() => handleSort('start_date')}>日期區間<SortIcon k="start_date"/></span>
+          <span style={{ flex: 0.8, textAlign: 'center', cursor: 'pointer' }} onClick={() => handleSort('published')}>狀態<SortIcon k="published"/></span>
           <span style={{ flex: 1.2, textAlign: 'center' }}>操作</span>
         </div>
-        {items.map(item => {
+        {sorted.map(item => {
           const status = getStatus(item);
           return (
             <div key={item.id} style={s.row}>

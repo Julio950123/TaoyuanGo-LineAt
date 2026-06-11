@@ -9,6 +9,11 @@ export default function Stores() {
   const [editId, setEditId] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDir, setSortDir] = useState('asc');
+  const handleSort = (key) => { if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortKey(key); setSortDir('asc'); } };
+  const sorted = [...items].sort((a, b) => { if (!sortKey) return 0; let va = a[sortKey] ?? '', vb = b[sortKey] ?? ''; if (sortKey === 'active') { va = va === true ? 2 : va === null ? 0 : 1; vb = vb === true ? 2 : vb === null ? 0 : 1; } if (va < vb) return sortDir === 'asc' ? -1 : 1; if (va > vb) return sortDir === 'asc' ? 1 : -1; return 0; });
+  const SortIcon = ({ k }) => sortKey === k ? <span style={{ marginLeft: 4, fontSize: 10 }}>{sortDir === 'asc' ? '▲' : '▼'}</span> : null;
   const load = () => api.getStores().then(d => setItems(Array.isArray(d) ? d : []));
   useEffect(() => { load(); }, []);
 
@@ -60,13 +65,13 @@ export default function Stores() {
 
       <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e8e8e8', overflow: 'hidden' }}>
         <div style={s.header}>
-          <span style={{ flex: 2 }}>店家名稱</span>
-          <span style={{ flex: 2 }}>地址</span>
-          <span style={{ flex: 1 }}>電話</span>
-          <span style={{ flex: 0.8, textAlign: 'center' }}>狀態</span>
+          <span style={{ flex: 2, cursor: 'pointer' }} onClick={() => handleSort('name')}>店家名稱<SortIcon k="name"/></span>
+          <span style={{ flex: 2, cursor: 'pointer' }} onClick={() => handleSort('address')}>地址<SortIcon k="address"/></span>
+          <span style={{ flex: 1, cursor: 'pointer' }} onClick={() => handleSort('phone')}>電話<SortIcon k="phone"/></span>
+          <span style={{ flex: 0.8, textAlign: 'center', cursor: 'pointer' }} onClick={() => handleSort('active')}>狀態<SortIcon k="active"/></span>
           <span style={{ flex: 1.2, textAlign: 'center' }}>操作</span>
         </div>
-        {items.map(item => {
+        {sorted.map(item => {
           const status = getStatus(item);
           return (
             <div key={item.id} style={s.row}>
