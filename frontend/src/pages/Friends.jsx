@@ -68,7 +68,7 @@ export default function Friends() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
               <button onClick={() => viewFootprints(c)} title="足跡" style={s.iconBtn}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#4fc3f7" stroke="none"><path d="M4 16.5c0-1.5 1.5-2.5 3-2.5s2.5 1.5 2.5 3c0 1.3-1 2.5-2.5 3S4 18.5 4 16.5zm1.5-6C5.5 9 7 8 8.5 8s2.5 1.5 2.5 3-1 2.5-2.5 2.5S5.5 12 5.5 10.5zm8 6c0-1.5 1-3 2.5-3s3 1 3 2.5-1.5 3-3 3-2.5-1.2-2.5-2.5zm-1-6c0-1.5 1-3 2.5-3s2.5 1 2.5 2.5-1 2.5-2.5 2.5-2.5-1-2.5-2z"/></svg>
               </button>
             </span>
           </div>
